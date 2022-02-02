@@ -203,7 +203,7 @@ touch test.txt
 touch is for creating empty files and you can see that test.txt is automatically listed in our project folder local machine.
 So all of the files are synchronized.
 If we go and remove this text.txt file from our project in editor and the go back to our terminal and type ls you can see that the file has been deleted.
-So the synchronizationworks both ways from the server to our host and from our host to the server.
+So the synchronization works both ways from the server to our host and from our host to the server.
 Okay so how do you run code from our project in our vagrant server.
 Make sure we're connected to our vagrant server 
 finally lets go ahead and commit and push our changes to github.
@@ -215,9 +215,35 @@ git commit -am "Configured Vagrant and setup hello world script"
 ```
 Now lets push these files to github by doing
 ```
-git push origin
+git push -f origin main
 ``` 
-This will push all f the latest changes that we've made to github so they'll be accessible in our project.
+This will push all  the latest changes that we've made to github so they'll be accessible in our project.
+
+# Create Python virtual Environment
+We need to create a python virtual environment so we can install aall the dependencies such as Python, django and django rest framework.
+I am going to show you how to create python virtual environment on the vagrant server, so connecting to the server by typing
+```
+vagrant ssh
+```
+and change directory to vagrant direcctory.
+
+```py
+vagrant@ubuntu-bionic:/vagrant$ python -m venv ~/env
+```
+what this does is it creates a new file in our vagrant home directory called env and creats pthon environment there.
+Now the reason I do it here because I don't want this environment to synchronize with our local machine. So if ever you need to destroy and recreate the the vagrant over from scratch you can do that with a fresh python virtual environment.This is why i specify this '~' here because it will create the environment in the home directory of our vagrant server as opposed to the vagrant folder which is synchronized to our local machine.
+so we activate and deactivate the virtual environment.
+To activate the virtual environment as you type source and then path to the activate the script with in our environment.
+So in our case this path would be in the home directory or ~/vagrant.
+```
+vagrant@ubuntu-bionic:/vagrant$ source ~/env/bin/activate
+```
+that's how you activate and deactivate the virtual environment.
+
+Next we're going to test the changes we've made to our django project.
+You can easily test changes that you made to a Django project using the Django development server
+So django comes with a handy development server that we can test our changes in the browser as we make them to the project.
+The way you start the Django development web server is you connect to your vagrant box. 
 
 
 
