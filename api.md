@@ -243,7 +243,91 @@ that's how you activate and deactivate the virtual environment.
 Next we're going to test the changes we've made to our django project.
 You can easily test changes that you made to a Django project using the Django development server
 So django comes with a handy development server that we can test our changes in the browser as we make them to the project.
-The way you start the Django development web server is you connect to your vagrant box. 
+The way you start the Django development web server is you connect to your vagrant box.
+
+## create our user database model
+The first model that we're going to create for our project is the user profile model out of the box.
+Django comes with the default user model that's used for the standard authentication system and also the Django admin.
+We're going to override this model with our own custom model that allow us to use an email address instead of the standard user name that comes with the Django default model.
+These are the standard base classes that you need to use when overriding or customizing the default Django user model.
+```model.py
+from django.db import models
+from django.contrib.auth.models import AbstractBaseUser
+from django.contrib.auth.models import PermissionsMixin
+from django.contrib.auth.models import BaseUserManager
+
+
+class UserProfileManager(BaseUserManager):
+    """ Manager for user profiles """
+    def create_user(self,email,name,password=None):
+        """" Create a new user profile """
+        if not email:
+            raise ValueError("User must have an email address")
+        
+        email = self.normalize_email(email)
+        user = self.model(email=email, name=name)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+    
+    def create_superuser(self,email,name,password):
+        """ Create and save a new superuser with given details """
+        user = self.create_user(email,name,password)
+        user.is_superuser = True
+        user.is_staff = True
+        user.save(using=self._db)
+        return user
+
+class UserProfile(AbstractBaseUser, PermissionsMixin):
+    """ Database model for users in the system  """
+    email = models.EmailField(max_length=200, unique=True)
+    name = models.CharField(max_length=255)
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+    
+    objects = UserProfileManager()
+    
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELD = ['name']
+    
+    def get_full_name(self):
+        """ Retrieve full name of user """
+        return self.name
+    
+    def get_short_name(self):
+        """ Retrieve short name of user """
+        return self.name
+    
+    def __str__(self):
+        """ Return the string representation of our user """
+        return self.email
+    
+
+
+
+
+```
+we need to define model manager that we're going to use for our the objects.
+And this is required for because we need to use our custom user model with Django CLI.
+So Django needs to have a custom model manager for the user model so its know how to create users
+
+## Add a user model Manager
+
+Now that we have our custom user model we can go ahead and create a manager.
+So Django knows how to work with this custom user model in the Django come online tool.
+
+Next we're going to do something called normailize the email address.Now what normalizing in the email address does is t makes the second half of the email address.
+
+## set our custom user model
+
+Now that we've created our custom user modeland our custom user model manager we can configure Django project to use this is as default user model instead of the one that's provided the Django.
+You set the User model in the settings.py file of the project.
+you create a new settings line 
+
+```settings.py
+AUTH_USER_MODEL = 'profiles_api.UserProfile'
+```
+Thats how you configure the custom user model in Django.
 
 
 
