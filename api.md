@@ -384,6 +384,14 @@ response needs to contain a dictionary or a list which it will the output as par
 So it converts the response object to Json and in order to convert it json it needs to be either be a list or a dictionary.
 
 
+## Serializer
+Now that we have created our API view we can go ahead and add a serializer to it. Serializer is a feature from Django REST Framework that allows you to easily convert data inputs into python objects and vice versa is kind of similar to django form which you define and it has the various fields that you want you to except for the input for your API. So if you're going to add post or update functionality to our Hello API View then you need to create serializer to receive the content that we post to the API.
+Serializer is function very similar to Django Forms.
+All you do is you define the serializer and then specify the fields that you want to accept in your serializer input.
+so we are going to create a field code name and this value that can be passed into the request that will be validated by the serializer. so serializer also take care of validation rules.
+
+
+
 
 
 
