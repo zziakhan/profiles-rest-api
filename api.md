@@ -331,8 +331,57 @@ Thats how you configure the custom user model in Django.
 
 
 
+## What is an APIView
 
+In this section i'm going to introduce you to API Views.The Django Rest framework offers a couple helper classes we can use to create our API endpoints.
+### Django REST Framework Views
+1. APIView
+2. ViewSet
 
+Both the classes are slightly different and offers thier own benefits. In this presentation I'm going to introduce you through the API view the APIView is the most basic type of view we can use to build our API.
+```
+1. APIView
+ - Describe logic to make API endpoint
+```
+It enable us to describe the logic which makes our API endpoint.
+
+## What are APIViews?
+```
+- Uses standard HTTP methods for functions
+- Give you the most control over the logic
+- Perfect for implementing complex logic
+- Calling other APIs 
+- Working with local files
+```
+An APIView allows us to define a functions that match the standard HTTP 
+```
+- GET -> Return one or more items
+- POST -> to create an item
+- PUT -> Update an item
+- Patch -> partially update an item
+- DELETE -> Delete an item
+```
+By allowing us to customize the function for each HTTP method on our API urls. API uses Give us the ost control over our application logic.
+This is perfect in cases where you need to do something a little bit different for simply updating objects in the database.
+Such as calling other APIs or working with local files so when should you use API vs a lot of the time.
+
+## when to use APIViews?
+
+```
+- Need full control over the logic 
+- Processing files and rendering a synchronous response 
+- You are calling other APIs/services
+- Accessing local files or data
+```
+a lot of the time it will depend on the personal perference as you learn more about the Django rest framework.
+Here are some examples of when it might be better to use APIViews whenever you need full control over your application logic such as when you're running a very complicated algorithm or updating multiple data source in one API call or when you 're processing files and rendering a synchronous response maybe you're validating a file and returning the result in the same call another time you might use it when you're calling other external API's or services in the same request.
+so that's the basic overview of the APIView.
+
+## Response
+
+So one of these get, post,put,patch,delete must return a response object so Django rest framework is expecting to return a response which it will then output as part when the API is called.
+response needs to contain a dictionary or a list which it will the output as part when the API is called.
+So it converts the response object to Json and in order to convert it json it needs to be either be a list or a dictionary.
 
 
 
