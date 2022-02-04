@@ -390,8 +390,106 @@ Serializer is function very similar to Django Forms.
 All you do is you define the serializer and then specify the fields that you want to accept in your serializer input.
 so we are going to create a field code name and this value that can be passed into the request that will be validated by the serializer. so serializer also take care of validation rules.
 
+```views.py
+# APIView class
+from django.shortcuts import render
+from rest_framework.views import APIView
+from rest_framework.response import Response
+
+from rest_framework import status
+from profiles_api import serializers
+
+class HelloApiView(APIView):
+    """" Test API View """
+    serializer_class = serializers.HelloSerializer
+    def get(self, request, format=None):
+        """ Returns a list of APIView features """
+        an_apiview = [
+            'Uses HTTP methods as function (get, post,put,patch,delete)',
+            'Is similar to a traditional Django View',
+            'Gives you most controll over you application logic',
+            'Is mapped manually to URLs'
+        ]
+        return Response({'messages': 'Helllo!','an_apiview': an_apiview})
+    
+    def post(self, request):
+        """ Create a hello message with our name """
+        serializer = self.serializer_class(data=request.data)
+        
+        if serializer.is_valid():
+            name = serializer.validated_data.get('name')
+            message = f'Hello {name}'
+            return Response({'messages': message})
+        
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+    def put(self, request,pk=None):
+        """Handle updating an object"""
+        return Response({'messages': 'PUT'})
+    
+    def patch(self, request,pk=None):
+        """ Handle a partial update of an object """
+        return Response({'messages': 'PATCH'})
+    
+    def delete(self, request,pk=None):
+        """ Delete an object """
+        return Response({'messages': 'DELETE'})
+
+```
+
+```serializers.py
+from rest_framework import serializers
 
 
+class HelloSerializer(serializers.Serializer):
+    """ Serializes a name field for testing our APIView """
+    name = serializers.CharField(max_length=10)
+```
+```urls.py
+from django.urls import path
+from profiles_api import views
+urlpatterns = [
+    path('hello-view/', views.HelloApiView.as_view())
+]
+```
+
+# Introduction to Viewsets
+
+```
+Django REST Framework Views
+1. APIView
+2.ViewSet
+```
+At the beginning of the last section i mentioned that django rest framework of is two classes that helps us write the logic for our api.
+The APIView and ViewSet classes.
+
+## What are ViewSet ?
+```
+- Uses model operations for the functions
+- Take care of a lot of typical logic for you
+- Perfect for standard database operations
+- Fastest way to make a database interface 
+```
+
+```
+list -> Getting a list of objects
+create -> Creating new objects
+retrieve -> Getting a specific object
+Update -> Updating an object
+partial_update -> Updating part of an object
+destroy -> Deleting an object
+```
+Just like APIView Viewsets allow us to write the logic for our endpoints. However, instead of defining functions which mapped to HTTP methods Viewsets excepts function that maps to common api object actions.
+## When to use ViewSets?
+
+```
+- A simple CRUD interface to your database
+- A quick and simple API
+- Little to no customization on the logic
+- Working with standard data structures
+```
+So I explained previously the functions that you add to the ViewSet is are a little bit different from APIView In APIView you add functions for the particular HTTP methods that you want to support on your endpoint for example HTTP POST, HTTP PUT, HTTP PATCH and HTTP DELETE for a ViewSet you add functions that represents actions  that you would perform on a typical api so the action that we're going to add is the list so a list is ypically HTTP get to the root of the endpoint to our ViewSet.
 
 
 
