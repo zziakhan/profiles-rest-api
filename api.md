@@ -288,7 +288,7 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     objects = UserProfileManager()
     
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELD = ['name']
+    REQUIRED_FIELDS = ['name']
     
     def get_full_name(self):
         """ Retrieve full name of user """
@@ -491,7 +491,194 @@ Just like APIView Viewsets allow us to write the logic for our endpoints. Howeve
 ```
 So I explained previously the functions that you add to the ViewSet is are a little bit different from APIView In APIView you add functions for the particular HTTP methods that you want to support on your endpoint for example HTTP POST, HTTP PUT, HTTP PATCH and HTTP DELETE for a ViewSet you add functions that represents actions  that you would perform on a typical api so the action that we're going to add is the list so a list is ypically HTTP get to the root of the endpoint to our ViewSet.
 
+```views.py
+                <!--views.py   -->
+from rest_framework import viewsets
 
+class HelloViewSet(viewsets.ViewSet):
+    """ Test API ViewSet """
+    serializer_class = serializers.HelloSerializer
+    
+    def list(self, request):
+        """ Return a hello message """
+        a_viewset = [
+            'Uses action (list,create,retrieve,update,partially_update,destroy)',
+            'Automatically maps to URLs using Routers',
+            'Provides more functionality with less code'
+        ]
+        return Response({'messages': 'Hello!', 'a_viewset': a_viewset})
+    
+    def create(self, request):
+        """ Create a new hello message """
+        serializer = self.serializer_class(data=request.data)
+        
+        if serializer.is_valid():
+            name = serializer.validated_data.get('name')
+            message = f'Hello {name}!'
+            return Response({'messages': message})
+        else:
+            return Response(
+                serializer.errors,
+                status = status.HTTP_400_BAD_REQUEST
+            )
+            
+    def retrieve(self, request,pk=None):
+        """ Handle getting an object by its ID """
+        return Response({'http_method': 'GET'})
+    
+    def update(self, request,pk=None):
+        """ Handle updating an object"""
+        return Response({'http_method': 'PUT'})
+    
+    def partially_update(self, request,pk=None):
+        """ Handle updating part of an object """
+        return Response({'http_method': 'PATCH'})
+    
+    def destroy(self, request,pk=None):
+        """ Handle removing an object """
+        return Response({'http_method': 'DELETE'})
+```
+
+```urls.py
+                <!--urls.py   -->
+from django.urls import path, include
+
+from profiles_api import views
+
+from rest_framework.routers import DefaultRouter
+
+router = DefaultRouter()
+router.register('hello-viewset', views.HelloViewSet, basename='hello-viewset')
+
+urlpatterns = [
+    path('hello-view/', views.HelloApiView.as_view()),
+    path('', include(router.urls))
+]
+```
+
+## PLAN OUR PROFILE API
+
+Now that we have to know how to make simple API we can move on to building our profiles api.
+I'm going to explain the specification of what we're going to build. Let's starts by listing some basic requirements our profile api is going to be handle the following 
+## BASIC REQUIREMENTS 
+```
+1. Create new profile
+    - Handle registration of new user
+    - Validate profile data
+
+2. Listing existing profiles
+    - Search for profiles
+    - Email and name
+
+3. View pecific profiles
+    - Profile ID
+
+4. Update profile of logged in User
+    - change name, email and password
+
+5. Delete profile
+``` 
+# API URLs
+
+```
+/api/profile/ 
+-> list all profiles when HTTP GET method is called
+-> create new profile when HTTP POST method is called
+
+/api/profile/<profile_id>/
+
+-> view specific profile detials by using HTTP GET method
+-> update object using HTTP PUT / PATCH
+-> remove it completely using HTTP DELETE
+```
+## create user profile serializer
+Let's start by creating our user profile api by creating a serializer for our user profile object.
+
+```
+from rest_framework import serializers
+
+from profiles_api import models
+
+
+class HelloSerializer(serializers.Serializer):
+    """ Serializes a name field for testing our APIView """
+    name = serializers.CharField(max_length=10)
+    
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    """ Serializes a user profile object """
+    class Meta:
+        model = models.UserProfile
+        fields = ('id', 'email', 'name', 'password')
+        extra_kwargs = {
+            'password': {
+                'write_only': True,
+            },
+            'style': {'input_type': 'password'}
+        }
+        
+    def create(self, validated_data):
+        user = models.UserProfile.objects.create_user(
+            email = validated_data['email']
+            name = validated_data['name']
+            password = validated_data['password']
+        )
+        
+        return user
+```
+## Create Profiles ViewSet
+```
+class UserProfileViewSet(viewsets.ModelViewSet):
+    """ Handle creating and updating profiles """
+    serializer_class = serializers.UserProfileSerializer
+    queryset = models.UserProfile.objects.all()
+```
+## Register profile Viewset with URL router
+
+```
+from django.urls import path, include
+
+from profiles_api import views
+
+from rest_framework.routers import DefaultRouter
+
+router = DefaultRouter()
+router.register('hello-viewset', views.HelloViewSet, basename='hello-viewset')
+router.register('profile', views.UserProfileViewSet)
+
+urlpatterns = [
+    path('hello-view/', views.HelloApiView.as_view()),
+    path('', include(router.urls))
+]
+```
+Unlike the 'hello-viewset' that we register previously we don't need to specify the a basename argument then this is because we have in our view set a queryset object if you provide the queryset then Django REST Framework can figure out the name from the model that's assign to it. so you only need to specify the basensme if you're creating a view set that doesn't have a queryset or if you want to override the name of the queryset that associated to it.
+
+## create permission classes
+ Okay so now we have fully functioning profile REST api. 
+ The way you define permission classes is you add a has object permissions function to the class which gets called every time a request is made to the api that we assign permission to the class.
+ This function will return True or False .To determine whether the authenticated user has the permissionto do the change that they're trying to do.
+ when you authenticate a request in Django REST framework it will asign the authenticated user profile to the request and we can use this to compare it o the object that is being updated and make sure they .
+ so when the user makes a request we're oing to check if the request is in the safe methods.If it is in the safe methods we are just going to allow the request to go through. Otherwise if it's not in the safe method. So they're using an update or delete or something like that then will return he result of obj.id equals to request..user.id This way it will eturn True if the user is trying to update thier own profile or otherwise it will return false.
+ Okay so thats how we create a custom permisssions with the Django rest framework.
+```
+from rest_framework import permissions
+
+
+class UpdateOwnProfile(permissions.BasePermission):
+    """ Allow user to edit thier own profile """
+    
+    def has_object_permission(self, request,view, obj):
+        """ check user is trying to edit thier own profile"""
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return obj.id == request.user.id
+```
+
+## Add authentication and permissions to the viewset
+Now that we have our update own profile permissions class we can go ahead and configure our viewset to use this permission.
+At the top of file we're going to add some imports and the first import we're going to import the token authenticationfrom the rest framework so type from 
+The Token Authentication is type of authentication we use for users to authenticate themselves with our API it works by generating a random token string when the users login and then every request we make to that we need to authenticate we add this token string to the request and hat's effectively a password to check that every request made s authenticated correctly we're going to configure this on our viewset and then 
+So every request that gets made it gets passsed through our permissions to profile and it checks.This has object permissions function to see wether the user has permissions to perform the action they trying to perform. 
 
 
 
