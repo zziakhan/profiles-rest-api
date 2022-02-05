@@ -678,7 +678,10 @@ class UpdateOwnProfile(permissions.BasePermission):
 Now that we have our update own profile permissions class we can go ahead and configure our viewset to use this permission.
 At the top of file we're going to add some imports and the first import we're going to import the token authenticationfrom the rest framework so type from 
 The Token Authentication is type of authentication we use for users to authenticate themselves with our API it works by generating a random token string when the users login and then every request we make to that we need to authenticate we add this token string to the request and hat's effectively a password to check that every request made s authenticated correctly we're going to configure this on our viewset and then 
-So every request that gets made it gets passsed through our permissions to profile and it checks.This has object permissions function to see wether the user has permissions to perform the action they trying to perform. 
+So every request that gets made it gets passsed through our permissions to profile and it checks.This has object permissions function to see wether the user has permissions to perform the action they trying to perform.
+
+## Add search profiles features
+Next we're going to add the ability to search profiles by a specific name or email address by adding the 
 
 
 
