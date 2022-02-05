@@ -683,6 +683,13 @@ So every request that gets made it gets passsed through our permissions to profi
 ## Add search profiles features
 Next we're going to add the ability to search profiles by a specific name or email address by adding the 
 
+## create login api viewset
+
+## Set token header using ModHeader Extension
+Next let's test our authentication token using the mod headers chrome extension.
+Now the way that the token authentication works is every single request that's made to our api has a HTTP Header.
+What we do is we add the token to the authorization header for the requests that we wish to authenticate.
+
 
 
 
