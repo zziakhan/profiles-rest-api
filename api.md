@@ -690,9 +690,40 @@ Next let's test our authentication token using the mod headers chrome extension.
 Now the way that the token authentication works is every single request that's made to our api has a HTTP Header.
 What we do is we add the token to the authorization header for the requests that we wish to authenticate.
 
+## PLAN OUR FEED API
+In this section we're going to build an API to handle user profile feed items lets start by describing the basic features our API requires.
+Our feed API is going to need to handle the following creating new feed items for authenticated users 
 
+## Basic Requirements
+```
+- Creating new feed items for logged in users only
+- Updating feed items
+- Deleteing items
+- Viewing other Profile status updates
+    - All users
+```
+## API URLS
+```
+api/feed/ -> list all feed items
+GET(list feed items)
+POST(create feed items for logged in users)
 
+/api/feed/<feed_item_id>/ -> manage secific feed tems
+                        -> GET(get the feed tem)
+                        -> PUT/PATCH(update feed item)
+                        -> DELETE(delete the feed item)
+```
+## Create viewset for our profile feed feed items
+Okay so we're going to use the token authentication to authenticate the requests to our endpoint.
+Next we're going to assign the queryset thatsgoing to managed through our viewsets.
+Okay so this setup a basic model viewsets that allow us to create nd manage feed item objects in the database.
 
+we need to add perform_create funtion to our model ViewSets. 
+The perform_create function is a handy feature of the Django REST framework that allows you to override the behavior for creating objects through a model view set.
+So when a request gets made to our viewsets it gets passed into our serializer class and validate and then ther serializer dot save function is called by default. if we need to customize the logic for creating an object the we can do this using they perform create fuction. So this perform create function get called every time you do an HTTP post to our viewsets. 
+So lets me just explain a little bit about how this works.
+So when a new object is created Django rest framework cores perform create and it passes in the serializer that we're using to create object the serializer is model serializer. so ti has save function assign to it and now the save function assigned to it and now save function is used to save the content of the serializer to an object in database.
+The request is an object that get passed into all view sets every time request is made and as the name suggests it contains all of the details about the request being made to the view set because we have added the token authentication.
 
 
 
